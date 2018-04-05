@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f network-gateway-latest.yml
+    kompose.version: 1.11.0 ()
+  creationTimestamp: null
+  labels:
+    io.kompose.service: admin
+  name: admin
+spec:
+  ports:
+  # - name: admin
+  #   port: 8444
+  #   targetPort: admin
+  - name: https
+    port: 443
+    targetPort: admin
+  selector:
+    io.kompose.service: admin
+  type: LoadBalancer

@@ -1,0 +1,28 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f network-gateway-latest.yml
+    kompose.version: 1.11.0 ()
+  creationTimestamp: null
+  labels:
+    io.kompose.service: portal
+  name: portal
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: portal
+    spec:
+      containers:
+      - image: duosecurity/network-gateway@sha256:a876ac6cdeb83879dce866779e3dccc294fc2c58ebbec67142977926b3d0a9a5
+        name: network-gateway-portal
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        resources: {}
+      restartPolicy: Always
+status: {}

@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: duo
+    purpse: auth
+  name: dag
+  namespace: duo
+spec:
+  ports:
+  - name: admin
+    port: 8443
+    protocol: TCP
+    targetPort: 8443
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 443
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: duo
+    purpose: auth
+  type: LoadBalancer

@@ -1,0 +1,45 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f network-gateway-latest.yml
+    kompose.version: 1.11.0 ()
+  creationTimestamp: null
+  labels:
+    io.kompose.service: redis
+  name: redis
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: redis
+    spec:
+      initContainers:
+      - name: init-redis-data
+        image: "busybox"
+        command: ["sh", "-c", "chmod 777 -R /data/"]
+        volumeMounts:
+        - name: redis-data
+          subPath: data # no more .last+found folder
+          mountPath: /data
+      containers:
+      - image: duosecurity/network-gateway@sha256:8e4c3f8c2576545a808b9127404455264b2d77b9bfaf5954c3e1d4b3d7aace40
+        name: network-gateway-redis
+        resources: {}
+        volumeMounts:
+        - mountPath: /data
+          subPath: data
+          name: redis-data
+        ports:
+        - name: redis
+          containerPort: 6379
+      restartPolicy: Always
+      volumes:
+      - name: redis-data
+        persistentVolumeClaim:
+          claimName: redis-data
+status: {}

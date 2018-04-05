@@ -1,0 +1,54 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: duo
+    purpse: auth
+  name: duo-access-gateway
+  namespace: duo
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: duo
+      purpose: auth
+  template:
+    metadata:
+      labels:
+        app: duo
+        purpose: auth
+    spec:
+      initContainers:
+      - name: init-duo-access-gateway
+        image: "busybox"
+        command: ["sh", "-c", "mkdir -p /data/cert && mkdir -p /data/log/supervisor/ && mkdir -p /data/log/php-fpm/ && mkdir -p /data/log/nginx/ && chmod 777 -R /data/"]
+        volumeMounts:
+        - name: data
+          subPath: data # no more .last+found folder
+          mountPath: /data
+      containers:
+      - image: duosecurity/access-gateway@sha256:dd9ec5fd5b94bdf286e7d42ef5d45a8ed79edcdc9d598a95d8ca064a5963a767
+        imagePullPolicy: Always
+        name: dag
+        env:
+        - name: TERM
+          value: xterm
+        volumeMounts:
+        - mountPath: /data
+          subPath: data # no more .lost+found folder
+          name: data
+        ports:
+        - name: http
+          containerPort: 80
+        - name: https
+          containerPort: 443
+        - name: admin-https
+          containerPort: 8443
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: duo-access-gateway-data
+      restartPolicy: Always
+      securityContext: {}
+      terminationGracePeriodSeconds: 1
